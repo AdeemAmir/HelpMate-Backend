@@ -84,15 +84,5 @@ app.use('*', (req, res) => {
   });
 });
 
-// ✅ Conditional listener — Vercel vs Local
-if (process.env.VERCEL) {
-  // On Vercel, just export the app (no listen)
-  module.exports = app;
-} else {
-  // Local or Render, start the server
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => {
-    console.log(`🚀 HealthMate server running on port ${PORT}`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-  });
-}
+module.exports = app;
+
