@@ -6,11 +6,11 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 // Import routes
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
-const fileRoutes = require('./routes/files');
-const vitalRoutes = require('./routes/vitals');
-const aiRoutes = require('./routes/ai');
+const authRoutes = require('../routes/auth');
+const userRoutes = require('../routes/users');
+const fileRoutes = require('../routes/files');
+const vitalRoutes = require('../routes/vitals');
+const aiRoutes = require('../routes/ai');
 
 const app = express();
 
