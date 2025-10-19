@@ -5,7 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-// Routes
+// Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const fileRoutes = require('./routes/files');
@@ -14,17 +14,19 @@ const aiRoutes = require('./routes/ai');
 
 const app = express();
 
-// ✅ Trust proxy (important for Vercel + rate-limit)
+// Trust proxy for Vercel (needed for rate-limiting and CORS)
 app.set('trust proxy', 1);
 
-// ✅ Security middleware
+// Security middleware
 app.use(helmet());
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    credentials: true
+  })
+);
 
-// ✅ Rate limiting
+// Rate limiting
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
@@ -32,32 +34,33 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// ✅ Body parsing
+// Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// ✅ Database connection (only once)
+// Database connection
 const mongoURI = process.env.MONGODB_URI;
 if (!mongoURI) {
   console.error('❌ Missing MONGODB_URI in environment variables.');
   process.exit(1);
 }
 
-mongoose.connect(mongoURI)
+mongoose
+  .connect(mongoURI)
   .then(() => console.log('✅ MongoDB connected successfully'))
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
     process.exit(1);
   });
 
-// ✅ Routes
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/vitals', vitalRoutes);
 app.use('/api/ai', aiRoutes);
 
-// ✅ Health check endpoint
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -66,7 +69,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ✅ Error handler
+// Error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
@@ -76,7 +79,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ✅ 404 handler
+// 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -84,5 +87,13 @@ app.use('*', (req, res) => {
   });
 });
 
+// Export app for Vercel
 module.exports = app;
 
+// Run locally only
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 HealthMate server running on port ${PORT}`);
+  });
+}
