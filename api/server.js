@@ -17,12 +17,29 @@ const app = express();
 // Trust proxy for Vercel (needed for rate-limiting and CORS)
 app.set('trust proxy', 1);
 
+// Allowed origins
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:3000', // Production front-end
+  'http://localhost:3000' // Local dev
+];
+
 // Security middleware
 app.use(helmet());
+
+// CORS middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
+    origin: function (origin, callback) {
+      // allow requests with no origin (mobile apps, curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+    optionsSuccessStatus: 200 // some legacy browsers choke on 204
   })
 );
 
