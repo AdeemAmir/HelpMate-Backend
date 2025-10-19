@@ -1,17 +1,15 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import dotenv from 'dotenv';
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+require('dotenv').config();
 
-import authRoutes from './routes/auth.js';
-import userRoutes from './routes/users.js';
-import fileRoutes from './routes/files.js';
-import vitalRoutes from './routes/vitals.js';
-import aiRoutes from './routes/ai.js';
-
-dotenv.config();
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const fileRoutes = require('./routes/files');
+const vitalRoutes = require('./routes/vitals');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 
@@ -30,7 +28,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Body parsing middleware
+// Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -64,7 +62,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({

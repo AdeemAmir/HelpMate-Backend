@@ -2,7 +2,7 @@
   "name": "healthmate-backend",
   "version": "1.0.0",
   "description": "HealthMate - Personal Health Vault Backend",
-  "type": "module",
+  "type": "commonjs",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
