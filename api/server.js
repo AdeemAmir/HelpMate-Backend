@@ -17,10 +17,10 @@ const app = express();
 // Trust proxy for Vercel (needed for rate-limiting and CORS)
 app.set('trust proxy', 1);
 
-// Allowed origins
+// Allowed origins for CORS
 const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:3000', // Production front-end
-  'http://localhost:3000' // Local dev
+  process.env.FRONTEND_URL || 'http://localhost:3000',
+  'http://localhost:3000'
 ];
 
 // Security middleware
@@ -30,7 +30,7 @@ app.use(helmet());
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (mobile apps, curl)
+      // allow requests with no origin (mobile apps, curl, Postman)
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) === -1) {
         const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
@@ -39,9 +39,15 @@ app.use(
       return callback(null, true);
     },
     credentials: true,
-    optionsSuccessStatus: 200 // some legacy browsers choke on 204
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    preflightContinue: false,
+    optionsSuccessStatus: 200
   })
 );
+
+// Handle OPTIONS preflight requests globally
+app.options('*', cors());
 
 // Rate limiting
 const limiter = rateLimit({
@@ -96,7 +102,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
+// 404 handler for API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({
     success: false,
